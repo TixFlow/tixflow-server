@@ -19,3 +19,17 @@ export class CreateBlogRequestBody{
     @IsNotEmpty()
     category: Category;
 }
+
+export class UpdateBlogRequestBody{
+    @ApiProperty()
+    title: string;
+
+    @ApiProperty()
+    content: string;
+
+    @ApiProperty()
+    imageUrl: string;
+
+    @ApiProperty({enum: Category, enumName: 'Category'})
+    category: Category;
+}

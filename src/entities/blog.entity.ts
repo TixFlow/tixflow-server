@@ -2,11 +2,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Ticket } from './ticket.entity';
+import { User } from './user.entity';
 
 export enum Category {
   Music = 'music',
@@ -62,4 +64,10 @@ export class Blog {
 
   @OneToMany(() => Ticket, (ticket) => ticket.blog)
   tickets: Array<Ticket>;
+
+  @Column({ type: 'uuid', length: 36 })
+  userId: string;
+
+  @ManyToOne(() => User, user => user.blogs)
+  user: User;
 }
