@@ -24,8 +24,9 @@ import { Blog, Category } from 'src/entities/blog.entity';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { RoleGuard } from 'src/guards/role.guard';
 import { Roles } from 'src/decorators/role.decorator';
-import { UserRole } from 'src/entities/user.entity';
+import { User, UserRole } from 'src/entities/user.entity';
 import { UserId } from 'src/decorators/user.decorator';
+import { Ticket } from 'src/entities/ticket.entity';
 
 @ApiTags('Blog')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -58,9 +59,10 @@ export class BlogController {
   @UseGuards(AuthGuard, RoleGuard)
   @Roles(UserRole.Admin, UserRole.Staff)
   async createBlog(
+    @UserId() userId: string,
     @Body() blog: CreateBlogRequestBody,
   ): Promise<ItemResponseData<Blog>> {
-    return await this.blogService.createBlog(blog);
+    return await this.blogService.createBlog(userId, blog);
   }
 
   @Put(':id')
@@ -86,5 +88,17 @@ export class BlogController {
     @Param('id') id: string,
   ): Promise<ItemResponseData<Blog>> {
     return await this.blogService.deleteBlog(userId, id);
+  }
+
+  @Get(':id/tickets')
+  @ApiOperation({ summary: 'Get all tickets of a blog' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'size', required: false, type: Number })
+  async getTicketsByBlogId(
+    @Query('page') page: number = 1,
+    @Query('size') size: number = 10,
+    @Param('id') id: string,
+  ): Promise<ListResponseData<Ticket>> {
+    return await this.blogService.getTicketsByBlogId(page, size, id);
   }
 }

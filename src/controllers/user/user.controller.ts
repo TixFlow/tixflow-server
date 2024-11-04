@@ -44,8 +44,9 @@ export class UserController {
     return await this.userService.getAllUsers({ page, size });
   }
 
-  @ApiOperation({ summary: 'Create a user' })
+  @ApiOperation({ summary: 'Create a user with staff role' })
   @Post()
+  @ApiBearerAuth()
   @UseGuards(AuthGuard, RoleGuard)
   @Roles(UserRole.Admin, UserRole.Moderator)
   async createUser(
