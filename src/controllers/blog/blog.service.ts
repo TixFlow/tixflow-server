@@ -5,6 +5,7 @@ import { ItemResponseData, ListResponseData } from '../base.dto';
 import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateBlogRequestBody, UpdateBlogRequestBody } from './blog.dto';
 import { User, UserRole } from 'src/entities/user.entity';
+import { Ticket } from 'src/entities/ticket.entity';
 
 export class BlogService {
   constructor(
@@ -12,6 +13,8 @@ export class BlogService {
     private readonly blogRepository: Repository<Blog>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Ticket)
+    private readonly ticketRepository: Repository<Ticket>,
   ) {}
 
   async getBlogById(id: string): Promise<ItemResponseData<Blog>> {
@@ -34,14 +37,11 @@ export class BlogService {
     size: number;
     category?: Category;
   }): Promise<ListResponseData<Blog>> {
-    const skip = (page - 1) * size;
-    const take = size;
     const total = await this.blogRepository.count();
     const data = await this.blogRepository.find({
-      where: category ? { category } : {},
-      skip,
-      take,
-      order: { createdAt: 'DESC' },
+      where: { category },
+      skip: (page - 1) * size,
+      take: size,
     });
     return {
       page,
@@ -53,9 +53,10 @@ export class BlogService {
   }
 
   async createBlog(
+    userId: string,
     blog: CreateBlogRequestBody,
   ): Promise<ItemResponseData<Blog>> {
-    const newBlog = await this.blogRepository.save(blog);
+    const newBlog = await this.blogRepository.save({...blog, userId});
     return {
       data: newBlog,
       message: 'Blog created successfully',
@@ -84,7 +85,7 @@ export class BlogService {
         'You are not allowed to update this blog',
       );
     }
-    
+
     const updateB = {
       ...found,
       title: blog.title || found.title,
@@ -100,7 +101,10 @@ export class BlogService {
     };
   }
 
-  async deleteBlog(userId: string, id: string): Promise<ItemResponseData<Blog>> {
+  async deleteBlog(
+    userId: string,
+    id: string,
+  ): Promise<ItemResponseData<Blog>> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('User not found');
@@ -122,6 +126,30 @@ export class BlogService {
     return {
       data: found,
       message: 'Blog deleted successfully',
+    };
+  }
+
+  async getTicketsByBlogId(
+    page: number,
+    size: number,
+    id: string,
+  ): Promise<ListResponseData<Ticket>> {
+    const blog = await this.blogRepository.findOne({ where: { id } });
+    if (!blog) {
+      throw new NotFoundException('Blog not found');
+    }
+    const total = await this.ticketRepository.count({ where: { blogId: id } });
+    const data = await this.ticketRepository.find({
+      where: { blogId: id },
+      skip: (page - 1) * size,
+      take: size,
+    });
+    return {
+      page,
+      size,
+      total,
+      data,
+      message: 'Tickets fetched successfully',
     };
   }
 }

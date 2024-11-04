@@ -46,6 +46,7 @@ export class UserController {
 
   @ApiOperation({ summary: 'Create a user' })
   @Post()
+  @ApiBearerAuth()
   @UseGuards(AuthGuard, RoleGuard)
   @Roles(UserRole.Admin, UserRole.Moderator)
   async createUser(
