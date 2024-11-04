@@ -1,6 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User, UserStatus } from 'src/entities/user.entity';
+import { User, UserRole, UserStatus } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
 import { ItemResponseData, ListResponseData } from '../base.dto';
 import { CreateUserRequestBody, UpdateUserRequestBody } from './user.dto';
@@ -55,6 +55,8 @@ export class UserService {
       data: {
         ...newUser,
         password: undefined,
+        status: UserStatus.Verified,
+        role: UserRole.Staff
       },
       message: 'User created successfully',
     };

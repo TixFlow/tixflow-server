@@ -37,7 +37,7 @@ export class BlogService {
     size: number;
     category?: Category;
   }): Promise<ListResponseData<Blog>> {
-    const total = await this.blogRepository.count();
+    const total = await this.blogRepository.count({ where: { category } });
     const data = await this.blogRepository.find({
       where: { category },
       skip: (page - 1) * size,
