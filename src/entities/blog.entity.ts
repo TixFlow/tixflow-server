@@ -2,6 +2,12 @@ import { Column, CreateDateColumn, Entity, JoinColumn, ManyToMany, ManyToOne, On
 import { Category } from "./category.entity";
 import { Ticket } from "./ticket.entity";
 
+export enum BlogStatus{
+    Pending = 'pending',
+    Approved = 'approved',
+    Rejected = 'rejected',
+    Removed = 'removed'
+}
 @Entity('blogs')
 export class Blog{
     @PrimaryGeneratedColumn('uuid')
