@@ -1,10 +1,13 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Ticket } from "./ticket.entity";
 import { Exclude } from "class-transformer";
+import { Order } from "./order.entity";
+import { Blog } from "./blog.entity";
 
 export enum UserRole{
     Admin = 'admin',
     Staff = 'staff',
+    Moderator = 'moderator',
     User = 'user'
 }
 
@@ -78,4 +81,10 @@ export class User{
 
     @OneToMany(() => Ticket, ticket => ticket.user)
     tickets: Array<Ticket>
+
+    @OneToMany(() => Order, order => order.user)
+    orders: Array<Order>
+
+    @OneToMany(() => Blog, blog => blog.user)
+    blogs: Array<Blog>
 }

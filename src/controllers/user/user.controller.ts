@@ -20,7 +20,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ItemResponseData, ListResponseData } from '../base.dto';
-import { User, UserRole } from 'src/entities';
+import { User, UserRole } from 'src/entities/user.entity';
 import { CreateUserRequestBody, UpdateUserRequestBody } from './user.dto';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { UserId } from 'src/decorators/user.decorator';

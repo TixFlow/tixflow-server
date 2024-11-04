@@ -1,8 +1,15 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { User } from "./user.entity";
 import { Blog } from "./blog.entity";
-import { Category } from "./category.entity";
 import { Order } from "./order.entity";
+
+export enum Category {
+    Music = 'music',
+    Sport = 'sport',
+    Seminar = 'seminar',
+    Culture = 'culture',
+    Workshop = 'workshop',
+  }
 
 export enum TicketStatus{
     Unpaid = 'unpaid',
@@ -57,11 +64,10 @@ export class Ticket{
     @JoinColumn({name: 'blogId'})
     blog: Blog;
 
-    @Column({type: 'uuid', length: 36})
-    categoryId: string;
-
-    @ManyToOne(() => Category, category => category.tickets)
-    @JoinColumn({name: 'categoryId'})
+    @Column({
+        type: 'enum',
+        enum: Category
+    })
     category: Category;
 
     @OneToMany(() => Order, order => order.ticket)
