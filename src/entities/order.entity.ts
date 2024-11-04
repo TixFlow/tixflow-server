@@ -47,7 +47,7 @@ export class Order{
     paymentMethod: OrderPaymentMethod;
 
     @Column({
-        type: 'number',
+        type: 'float',
         default: 0
     })
     totalAmount: number;

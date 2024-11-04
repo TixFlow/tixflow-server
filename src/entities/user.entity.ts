@@ -1,5 +1,6 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Ticket } from "./ticket.entity";
+import { Exclude } from "class-transformer";
 
 export enum UserRole{
     Admin = 'admin',
@@ -42,10 +43,11 @@ export class User{
     })
     role: UserRole;
 
-    @Column({type: 'varchar', length: 50})
+    @Column({type: 'varchar', length: 50, default: null})
     avatarUrl: string;
 
-    @Column({type: 'varchar', length: 50})
+    @Column({type: 'varchar', length: 255})
+    @Exclude()
     password: string;
 
     @Column({type: 'varchar', length: 50})
@@ -65,7 +67,7 @@ export class User{
     })
     status: UserStatus;
 
-    @Column({type: 'varchar', length: 50})
+    @Column({type: 'varchar', length: 50, default: null})
     verificationCode: string;
 
     @CreateDateColumn()

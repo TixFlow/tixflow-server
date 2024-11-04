@@ -27,7 +27,7 @@ export class Ticket{
     @Column({type: 'varchar', length: 50})
     imageUrl: string;
 
-    @Column({type:'number', default: 0})
+    @Column({type:'float', default: 0})
     price: number;
 
     @Column({

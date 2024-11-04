@@ -21,7 +21,7 @@ export class Transaction{
     status: TransactionStatus;
 
     @Column({
-        type: 'number',
+        type: 'float',
         default: 0
     })
     totalAmount: number;
