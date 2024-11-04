@@ -30,11 +30,13 @@ export class UserService {
     const skip = (page - 1) * size;
     const take = size;
     const total = await this.userRepository.count();
+    const totalPage = Math.ceil(total / size);
     const data = await this.userRepository.find({ skip, take });
     return {
       page,
       size,
       total,
+      totalPage,
       data,
       message: 'Users fetched successfully',
     };
