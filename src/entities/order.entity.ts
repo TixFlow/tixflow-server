@@ -1,6 +1,7 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Ticket } from "./ticket.entity";
 import { Transaction } from "./transaction.entity";
+import { User } from "./user.entity";
 
 export enum OrderStatus{
     Pending = 'pending',
@@ -61,6 +62,16 @@ export class Order{
     @OneToMany(() => Ticket, ticket => ticket.orders)
     @JoinColumn({name: 'ticketId'})
     ticket: Ticket;
+
+    @Column({
+        type: 'uuid',
+        length: 36,
+    })
+    userId: string;
+
+    @OneToMany(() => Ticket, ticket => ticket.orders)
+    @JoinColumn({name: 'userId'})
+    user: User;
 
     @OneToOne(() => Transaction, transaction => transaction.order)
     transaction: Transaction;

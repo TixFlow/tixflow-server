@@ -1,6 +1,7 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Ticket } from "./ticket.entity";
 import { Exclude } from "class-transformer";
+import { Order } from "./order.entity";
 
 export enum UserRole{
     Admin = 'admin',
@@ -78,4 +79,7 @@ export class User{
 
     @OneToMany(() => Ticket, ticket => ticket.user)
     tickets: Array<Ticket>
+
+    @OneToMany(() => Order, order => order.user)
+    orders: Array<Order>
 }
