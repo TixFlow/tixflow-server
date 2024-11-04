@@ -46,6 +46,7 @@ export class BlogService {
       title: search ? Like(`%${search}%`) : undefined,
       },
     });
+    const totalPage = Math.ceil(total / size);
     const data = await this.blogRepository.find({
       where: {
         category,
@@ -58,6 +59,7 @@ export class BlogService {
       page,
       size,
       total,
+      totalPage,
       data,
       message: 'Blogs fetched successfully',
     };
@@ -155,10 +157,12 @@ export class BlogService {
       skip: (page - 1) * size,
       take: size,
     });
+    const totalPage = Math.ceil(total / size);
     return {
       page,
       size,
       total,
+      totalPage,
       data,
       message: 'Tickets fetched successfully',
     };
