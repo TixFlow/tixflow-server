@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEmail, IsNotEmpty } from "class-validator";
-import { UserGender, UserRole } from "src/entities";
+import { UserGender, UserRole } from "src/entities/user.entity";
 
 export class CreateUserRequestBody{
     @ApiProperty()
