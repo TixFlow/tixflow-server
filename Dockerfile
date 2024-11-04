@@ -6,6 +6,8 @@ ARG NODE_VERSION=20.14.0
 # Stage 1: Build
 FROM node:${NODE_VERSION}-alpine AS build
 
+RUN yarn global add @nestjs/cli
+
 # Set the working directory
 WORKDIR /usr/src/app
 
