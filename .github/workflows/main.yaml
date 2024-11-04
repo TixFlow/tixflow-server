@@ -1,0 +1,37 @@
+name: Deploy on VPS
+
+on: 
+  push:
+    branches:
+      - main
+
+jobs:
+  docker-compose:
+    runs-on: self-hosted
+    environment: docker
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Use github secrets
+        run: |
+          echo "PORT=${{ secrets.PORT }}" >> .env
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+        shell: bash
+
+      - name: Compose down
+        run: docker compose down
+        shell: bash
+
+      - name: Run `docker compose`
+        run: docker compose up --build -d
+        shell: bash 
+
+      - name: Remove unused images
+        run: docker system prune -a -f
+        shell: bash
