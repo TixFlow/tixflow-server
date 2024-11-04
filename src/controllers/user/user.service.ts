@@ -1,8 +1,10 @@
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities';
 import { Repository } from 'typeorm';
-import { ListResponseData } from '../base.dto';
+import { ItemResponseData, ListResponseData } from '../base.dto';
+import { CreateUserRequestBody } from './user.dto';
+import * as bcrypt from 'bcrypt';
 
 export class UserService {
   constructor(
@@ -36,5 +38,21 @@ export class UserService {
       data,
       message: 'Users fetched successfully',
     };
+  }
+
+  async createUser(user: CreateUserRequestBody) : Promise<ItemResponseData<User>>{
+    const found = await this.userRepository.findOne({ where: { email: user.email } });
+    if(found){
+      throw new BadRequestException('User already exists');
+    }
+    user.password = await bcrypt.hash(user.password, 10);
+    const newUser : User = await this.userRepository.save(user);
+    return {
+      data: {
+        ...newUser,
+        password: undefined
+      },
+      message: 'User created successfully'
+    }
   }
 }
