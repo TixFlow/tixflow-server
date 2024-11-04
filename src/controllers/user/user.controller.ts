@@ -1,9 +1,11 @@
-import { Body, ClassSerializerInterceptor, Controller, Get, Post, Query, UseInterceptors } from "@nestjs/common";
+import { Body, ClassSerializerInterceptor, Controller, ForbiddenException, Get, Param, Post, Put, Query, UseGuards, UseInterceptors } from "@nestjs/common";
 import { UserService } from "./user.service";
-import { ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { ItemResponseData, ListResponseData } from "../base.dto";
 import { User } from "src/entities";
-import { CreateUserRequestBody } from "./user.dto";
+import { CreateUserRequestBody, UpdateUserRequestBody } from "./user.dto";
+import { AuthGuard } from "src/guards/auth.guard";
+import { UserId } from "src/decorators/user.decorator";
 
 @ApiTags('Users')
 @Controller('users')
@@ -28,5 +30,28 @@ export class UserController{
     @Post()
     async createUser(@Body() user : CreateUserRequestBody) : Promise<ItemResponseData<User>>{
         return await this.userService.createUser(user);
+    }
+
+    @ApiOperation({ summary: 'Get a user by id' })
+    @Get(':id')
+    async getUserById(@Param('id') id: string): Promise<ItemResponseData<User>> {
+        const user = await this.userService.getUserById(id);
+        return {
+            data: user,
+            message: 'User fetched successfully'
+        }
+    }
+
+    @ApiOperation({ summary: 'Update a user' })
+    @ApiBearerAuth()
+    @Put(':id')
+    @UseGuards(AuthGuard)
+    async updateUser(
+        @Param('id') id: string,
+        @UserId() userId: string,
+        @Body() user: UpdateUserRequestBody
+    ) : Promise<ItemResponseData<User>>{
+        if (id !== userId) throw new ForbiddenException('You are not allowed to update this user');
+        return await this.userService.updateUser(id, user);
     }
 }

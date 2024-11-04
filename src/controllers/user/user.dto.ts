@@ -32,3 +32,17 @@ export class CreateUserRequestBody{
     @ApiProperty()
     gender: UserGender;
 }
+
+export class UpdateUserRequestBody{
+    @ApiProperty()
+    password: string;
+
+    @ApiProperty()
+    firstName: string;
+
+    @ApiProperty()
+    lastName: string;
+
+    @ApiProperty()
+    phoneNumber: string;
+}

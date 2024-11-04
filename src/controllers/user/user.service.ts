@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities';
 import { Repository } from 'typeorm';
 import { ItemResponseData, ListResponseData } from '../base.dto';
-import { CreateUserRequestBody } from './user.dto';
+import { CreateUserRequestBody, UpdateUserRequestBody } from './user.dto';
 import * as bcrypt from 'bcrypt';
 
 export class UserService {
@@ -53,6 +53,29 @@ export class UserService {
         password: undefined
       },
       message: 'User created successfully'
+    }
+  }
+
+  async updateUser(id: string, user: UpdateUserRequestBody) : Promise<ItemResponseData<User>>{
+    const found = await this.userRepository.findOne({ where: { id } });
+    if(!found){
+      throw new NotFoundException('User not found');
+    }
+    user = {
+      ...user,
+      firstName: user.firstName || found.firstName,
+      lastName: user.lastName || found.lastName,
+      phoneNumber: user.phoneNumber || found.phoneNumber,
+      password: user.password ? await bcrypt.hash(user.password, 10) : undefined
+    }
+    await this.userRepository.update(id, user);
+    const updatedUser = await this.userRepository.findOne({ where: { id } });
+    return {
+      data: {
+        ...updatedUser,
+        password: undefined
+      },
+      message: 'User updated successfully'
     }
   }
 }
