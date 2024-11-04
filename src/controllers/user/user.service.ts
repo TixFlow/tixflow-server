@@ -1,6 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/entities';
+import { User, UserStatus } from 'src/entities';
 import { Repository } from 'typeorm';
 import { ItemResponseData, ListResponseData } from '../base.dto';
 import { CreateUserRequestBody, UpdateUserRequestBody } from './user.dto';
@@ -40,25 +40,32 @@ export class UserService {
     };
   }
 
-  async createUser(user: CreateUserRequestBody) : Promise<ItemResponseData<User>>{
-    const found = await this.userRepository.findOne({ where: { email: user.email } });
-    if(found){
+  async createUser(
+    user: CreateUserRequestBody,
+  ): Promise<ItemResponseData<User>> {
+    const found = await this.userRepository.findOne({
+      where: { email: user.email },
+    });
+    if (found) {
       throw new BadRequestException('User already exists');
     }
     user.password = await bcrypt.hash(user.password, 10);
-    const newUser : User = await this.userRepository.save(user);
+    const newUser: User = await this.userRepository.save(user);
     return {
       data: {
         ...newUser,
-        password: undefined
+        password: undefined,
       },
-      message: 'User created successfully'
-    }
+      message: 'User created successfully',
+    };
   }
 
-  async updateUser(id: string, user: UpdateUserRequestBody) : Promise<ItemResponseData<User>>{
+  async updateUser(
+    id: string,
+    user: UpdateUserRequestBody,
+  ): Promise<ItemResponseData<User>> {
     const found = await this.userRepository.findOne({ where: { id } });
-    if(!found){
+    if (!found) {
       throw new NotFoundException('User not found');
     }
     user = {
@@ -66,16 +73,38 @@ export class UserService {
       firstName: user.firstName || found.firstName,
       lastName: user.lastName || found.lastName,
       phoneNumber: user.phoneNumber || found.phoneNumber,
-      password: user.password ? await bcrypt.hash(user.password, 10) : undefined
-    }
-    await this.userRepository.update(id, user);
+      password: user.password
+        ? await bcrypt.hash(user.password, 10)
+        : undefined,
+    };
+    await this.userRepository.update(id, { ...user, updateAt: new Date() });
     const updatedUser = await this.userRepository.findOne({ where: { id } });
     return {
       data: {
         ...updatedUser,
-        password: undefined
+        password: undefined,
       },
-      message: 'User updated successfully'
+      message: 'User updated successfully',
+    };
+  }
+
+  async deleteUser(id: string): Promise<ItemResponseData<User>> {
+    const fonud = await this.userRepository.findOne({ where: { id } });
+    if (!fonud) {
+      throw new NotFoundException('User not found');
     }
+    if (fonud.status === UserStatus.Removed) {
+      throw new BadRequestException('User already deleted');
+    }
+    fonud.status = UserStatus.Removed;
+    await this.userRepository.update(id, { ...fonud, updateAt: new Date() });
+    const removedUser = await this.userRepository.findOne({ where: { id } });
+    return {
+      data: {
+        ...removedUser,
+        password: undefined,
+      },
+      message: 'User deleted successfully',
+    };
   }
 }

@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from "@nestjs/comm
 import * as bcrypt from 'bcrypt';
 import { JwtService } from "@nestjs/jwt";
 import { InjectRepository } from "@nestjs/typeorm";
-import { User } from "src/entities";
+import { User, UserStatus } from "src/entities";
 import { Repository } from "typeorm";
 import { SignInRequestBody, SignInResponseData, SignUpRequestBody, SignUpResponseData, VerifiedResponseData } from "./auth.dto";
 
@@ -18,6 +18,9 @@ export class AuthService {
         const user = await this.userRepository.findOneBy({email});
         if(!user){
             throw new NotFoundException('User not found');
+        }
+        if(user.status === UserStatus.Removed || user.status === UserStatus.Banned){
+            throw new BadRequestException('User is not allowed to login');
         }
         if (!await bcrypt.compare(password, user.password)){
             throw new BadRequestException('Wrong creadentials');
