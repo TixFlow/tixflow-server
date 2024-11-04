@@ -1,11 +1,12 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Blog, BlogStatus, Category } from 'src/entities/blog.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { ItemResponseData, ListResponseData } from '../base.dto';
 import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateBlogRequestBody, UpdateBlogRequestBody } from './blog.dto';
 import { User, UserRole } from 'src/entities/user.entity';
 import { Ticket } from 'src/entities/ticket.entity';
+import { contains } from 'class-validator';
 
 export class BlogService {
   constructor(
@@ -32,14 +33,24 @@ export class BlogService {
     page,
     size,
     category,
+    search,
   }: {
     page: number;
     size: number;
     category?: Category;
+    search?: string;
   }): Promise<ListResponseData<Blog>> {
-    const total = await this.blogRepository.count({ where: { category } });
+    const total = await this.blogRepository.count({
+      where: {
+      category,
+      title: search ? Like(`%${search}%`) : undefined,
+      },
+    });
     const data = await this.blogRepository.find({
-      where: { category },
+      where: {
+        category,
+        title: search ? Like(`%${search}%`) : undefined,
+        },
       skip: (page - 1) * size,
       take: size,
     });
