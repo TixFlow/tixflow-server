@@ -39,12 +39,14 @@ export class BlogController {
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'size', required: false, type: Number })
   @ApiQuery({ name: 'category', required: false, enum: Category })
+  @ApiQuery({ name: 'search', required: false, type: String })
   async getAllBlogs(
     @Query('page') page: number = 1,
     @Query('size') size: number = 10,
     @Query('category') category: Category = null,
+    @Query('search') search: string = null,
   ): Promise<ListResponseData<Blog>> {
-    return await this.blogService.getAllBlogs({ page, size, category });
+    return await this.blogService.getAllBlogs({ page, size, category , search});
   }
 
   @Get(':id')
