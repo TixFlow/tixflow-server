@@ -1,7 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Observable } from 'rxjs';
 import { User } from 'src/entities';
 import { Repository } from 'typeorm';
 
