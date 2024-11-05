@@ -1,24 +1,24 @@
 import { Module } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { BlogService } from "./blog.service";
-import { BlogController } from "./blog.controller";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Blog } from "src/entities/blog.entity";
-import { User } from "src/entities/user.entity";
 import { Ticket } from "src/entities/ticket.entity";
+import { User } from "src/entities/user.entity";
+import { TicketService } from "./ticket.service";
+import { TicketController } from "./ticket.controllet";
 import { UserService } from "../user/user.service";
 
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([Blog,User,Ticket])
+    imports:[
+        TypeOrmModule.forFeature([Ticket, User, Blog])
     ],
-    controllers: [BlogController],
+    controllers: [TicketController],
     providers: [
         JwtService,
-        BlogService,
+        TicketService,
         UserService
-    ],
+    ]
 })
-export class BlogModule{
+export class TicketModule{
 
 }

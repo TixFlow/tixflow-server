@@ -77,14 +77,10 @@ export class BlogService {
   }
 
   async updateBlog(
-    userId: string,
+    user: User,
     id: string,
     blog: UpdateBlogRequestBody,
   ): Promise<ItemResponseData<Blog>> {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
     const found = await this.blogRepository.findOne({ where: { id } });
     if (!found) {
       throw new NotFoundException('Blog not found');
@@ -115,13 +111,9 @@ export class BlogService {
   }
 
   async deleteBlog(
-    userId: string,
+    user: User,
     id: string,
   ): Promise<ItemResponseData<Blog>> {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
     const found = await this.blogRepository.findOne({ where: { id } });
     if (!found) {
       throw new NotFoundException('Blog not found');

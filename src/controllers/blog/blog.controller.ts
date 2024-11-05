@@ -27,12 +27,16 @@ import { Roles } from 'src/decorators/role.decorator';
 import { User, UserRole } from 'src/entities/user.entity';
 import { UserId } from 'src/decorators/user.decorator';
 import { Ticket } from 'src/entities/ticket.entity';
+import { UserService } from '../user/user.service';
 
 @ApiTags('Blog')
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('blogs')
 export class BlogController {
-  constructor(private readonly blogService: BlogService) {}
+  constructor(
+    private readonly blogService: BlogService,
+    private readonly userService: UserService,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Get all blogs' })
@@ -46,7 +50,7 @@ export class BlogController {
     @Query('category') category: Category = null,
     @Query('search') search: string = null,
   ): Promise<ListResponseData<Blog>> {
-    return await this.blogService.getAllBlogs({ page, size, category , search});
+    return await this.blogService.getAllBlogs({ page, size, category, search });
   }
 
   @Get(':id')
@@ -77,7 +81,8 @@ export class BlogController {
     @Body() blog: UpdateBlogRequestBody,
     @Param('id') id: string,
   ): Promise<ItemResponseData<Blog>> {
-    return await this.blogService.updateBlog(userId, id, blog);
+    const user = await this.userService.getUserById(userId);
+    return await this.blogService.updateBlog(user, id, blog);
   }
 
   @Delete(':id')
@@ -89,7 +94,8 @@ export class BlogController {
     @UserId() userId: string,
     @Param('id') id: string,
   ): Promise<ItemResponseData<Blog>> {
-    return await this.blogService.deleteBlog(userId, id);
+    const user = await this.userService.getUserById(userId);
+    return await this.blogService.deleteBlog(user, id);
   }
 
   @Get(':id/tickets')
