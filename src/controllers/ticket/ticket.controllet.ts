@@ -17,15 +17,15 @@ export class TicketController{
     @Get()
     @ApiQuery({ name: 'page', required: false, type: Number })
     @ApiQuery({ name: 'size', required: false, type: Number })
-    @ApiQuery({ name: 'category', required: false, type: String })
     @ApiQuery({ name: 'search', required: false, type: String })
     async getAllTickets(
         @Query('page') page: number = 1,
         @Query('size') size: number = 10,
-        @Query('category') category: Category = null,
         @Query('search') search: string = null,
+        @Query('minPrice') minPrice: number = null,
+        @Query('maxPrice') maxPrice: number = null,
+        @Query('location') location: string = null,
     ){
-        const blogs = await this.blogService.getAllBlogs({ page, size, category });
-        
+        return await this.ticketService.getAllTickets({ page, size, search, minPrice, maxPrice, location });
     }
 }
