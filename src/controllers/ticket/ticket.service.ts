@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Ticket } from 'src/entities/ticket.entity';
 import { Between, LessThanOrEqual, Like, MoreThanOrEqual, Repository } from 'typeorm';
-import { ListResponseData } from '../base.dto';
+import { ItemResponseData, ListResponseData } from '../base.dto';
 
 @Injectable()
 export class TicketService {
@@ -62,6 +62,17 @@ export class TicketService {
       totalPage,
       data,
       message: 'Tickets fetched successfully',
+    };
+  }
+
+  async getTicketById(id: string): Promise<ItemResponseData<Ticket>>{
+    const ticket = await this.ticketRepository.findOne({ where: { id } });
+    if (!ticket) {
+      throw new NotFoundException('Ticket not found');
+    }
+    return {
+      data: ticket,
+      message: 'Ticket fetched successfully',
     };
   }
 }
