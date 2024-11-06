@@ -6,6 +6,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { Blog } from "src/entities/blog.entity";
 import { User } from "src/entities/user.entity";
 import { Ticket } from "src/entities/ticket.entity";
+import { UserService } from "../user/user.service";
 
 @Module({
     imports: [
@@ -14,7 +15,8 @@ import { Ticket } from "src/entities/ticket.entity";
     controllers: [BlogController],
     providers: [
         JwtService,
-        BlogService
+        BlogService,
+        UserService
     ],
 })
 export class BlogModule{

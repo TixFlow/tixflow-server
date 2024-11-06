@@ -1,8 +1,12 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Blog, BlogStatus, Category } from 'src/entities/blog.entity';
-import { Like, Repository } from 'typeorm';
+import { Like, Not, Repository } from 'typeorm';
 import { ItemResponseData, ListResponseData } from '../base.dto';
-import { NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateBlogRequestBody, UpdateBlogRequestBody } from './blog.dto';
 import { User, UserRole } from 'src/entities/user.entity';
 import { Ticket } from 'src/entities/ticket.entity';
@@ -42,8 +46,8 @@ export class BlogService {
   }): Promise<ListResponseData<Blog>> {
     const total = await this.blogRepository.count({
       where: {
-      category,
-      title: search ? Like(`%${search}%`) : undefined,
+        category,
+        title: search ? Like(`%${search}%`) : undefined,
       },
     });
     const totalPage = Math.ceil(total / size);
@@ -51,7 +55,8 @@ export class BlogService {
       where: {
         category,
         title: search ? Like(`%${search}%`) : undefined,
-        },
+        status: Not(BlogStatus.Removed)
+      },
       skip: (page - 1) * size,
       take: size,
     });
@@ -69,7 +74,13 @@ export class BlogService {
     userId: string,
     blog: CreateBlogRequestBody,
   ): Promise<ItemResponseData<Blog>> {
-    const newBlog = await this.blogRepository.save({...blog, userId});
+    const found = await this.blogRepository.findOne({
+      where: { title: blog.title },
+    });
+    if (found) {
+      throw new ForbiddenException('Blog with this title already exists');
+    }
+    const newBlog = await this.blogRepository.save({ ...blog, userId });
     return {
       data: newBlog,
       message: 'Blog created successfully',
@@ -77,14 +88,10 @@ export class BlogService {
   }
 
   async updateBlog(
-    userId: string,
+    user: User,
     id: string,
     blog: UpdateBlogRequestBody,
   ): Promise<ItemResponseData<Blog>> {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
     const found = await this.blogRepository.findOne({ where: { id } });
     if (!found) {
       throw new NotFoundException('Blog not found');
@@ -114,14 +121,7 @@ export class BlogService {
     };
   }
 
-  async deleteBlog(
-    userId: string,
-    id: string,
-  ): Promise<ItemResponseData<Blog>> {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
+  async deleteBlog(user: User, id: string): Promise<ItemResponseData<Blog>> {
     const found = await this.blogRepository.findOne({ where: { id } });
     if (!found) {
       throw new NotFoundException('Blog not found');
