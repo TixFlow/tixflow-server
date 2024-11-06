@@ -38,6 +38,8 @@ export class TicketController {
   @ApiQuery({ name: 'minPrice', required: false, type: Number })
   @ApiQuery({ name: 'maxPrice', required: false, type: Number })
   @ApiQuery({ name: 'location', required: false, type: String })
+  @ApiQuery({ name: 'fromDate', required: false, type: Date })
+  @ApiQuery({ name: 'toDate', required: false, type: Date })
   async getAllTickets(
     @Query('page') page: number = 1,
     @Query('size') size: number = 10,
@@ -45,6 +47,8 @@ export class TicketController {
     @Query('minPrice') minPrice: number = null,
     @Query('maxPrice') maxPrice: number = null,
     @Query('location') location: string = null,
+    @Query('fromDate') fromDate: Date = null,
+    @Query('toDate') toDate: Date = null,
   ) {
     return await this.ticketService.getAllTickets({
       page,
@@ -53,6 +57,8 @@ export class TicketController {
       minPrice,
       maxPrice,
       location,
+      fromDate,
+      toDate,
     });
   }
 
