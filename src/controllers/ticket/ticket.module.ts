@@ -7,6 +7,7 @@ import { User } from "src/entities/user.entity";
 import { TicketService } from "./ticket.service";
 import { TicketController } from "./ticket.controllet";
 import { UserService } from "../user/user.service";
+import { BlogService } from "../blog/blog.service";
 
 @Module({
     imports:[
@@ -16,7 +17,8 @@ import { UserService } from "../user/user.service";
     providers: [
         JwtService,
         TicketService,
-        UserService
+        UserService,
+        BlogService
     ]
 })
 export class TicketModule{

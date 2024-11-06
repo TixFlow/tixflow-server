@@ -85,7 +85,14 @@ export class TicketService {
     if(!blog){
       throw new BadRequestException('Blog not found');
     }
-    const ticket = await this.ticketRepository.save({ ...body, userId});
+    const {expiryDate, ...rest} = body;
+    const formettedExpiryDate = new Date(expiryDate);
+    const _ticket = {
+      ...rest,
+      expiryDate: formettedExpiryDate,
+      userId
+    }
+    const ticket = await this.ticketRepository.save(_ticket);
     return {
       data: ticket,
       message: 'Ticket created successfully',

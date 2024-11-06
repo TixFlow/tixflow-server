@@ -12,9 +12,9 @@ import { TicketService } from './ticket.service';
 import { UserService } from '../user/user.service';
 import { BlogService } from '../blog/blog.service';
 import { Category } from 'src/entities/blog.entity';
-import { AuthGuard } from '@nestjs/passport';
 import { UserId } from 'src/decorators/user.decorator';
 import { CreateTicketRequestBody } from './ticket.dto';
+import { AuthGuard } from 'src/guards/auth.guard';
 
 @ApiTags('Ticket')
 @Controller('tickets')
