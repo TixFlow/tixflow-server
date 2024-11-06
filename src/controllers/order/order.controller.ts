@@ -2,7 +2,9 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Param,
   Post,
+  Put,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
@@ -14,6 +16,7 @@ import { UserId } from 'src/decorators/user.decorator';
 import { TicketService } from '../ticket/ticket.service';
 import { UserService } from '../user/user.service';
 import { TicketStatus } from 'src/entities/ticket.entity';
+import { OrderStatus } from 'src/entities/order.entity';
 
 @Controller('orders')
 @ApiTags('Order')
@@ -44,8 +47,21 @@ export class OrderController {
       ticket.status === TicketStatus.Sold ||
       ticket.status === TicketStatus.InProgress
     ) {
-        throw new BadRequestException('Ticket not available');
+      throw new BadRequestException('Ticket not available');
     }
     return await this.orderService.createOrder({ user, body });
+  }
+
+  @Put('cancel/:id')
+  @ApiOperation({ summary: 'Cancel Order' })
+  async cancelOrder(@UserId() userId: string, @Param('id') orderId: string) {
+    const order = (await this.orderService.getOrderById(orderId)).data;
+    if (order.userId !== userId) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+    return await this.orderService.updateOrderStatus(
+      orderId,
+      OrderStatus.Cancelled,
+    );
   }
 }
