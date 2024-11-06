@@ -48,6 +48,7 @@ export class BlogService {
       where: {
         category,
         title: search ? Like(`%${search}%`) : undefined,
+        status: Not(BlogStatus.Removed)
       },
     });
     const totalPage = Math.ceil(total / size);

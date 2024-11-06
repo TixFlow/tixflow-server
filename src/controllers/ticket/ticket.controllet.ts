@@ -10,7 +10,12 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { TicketService } from './ticket.service';
 import { UserService } from '../user/user.service';
 import { BlogService } from '../blog/blog.service';
@@ -38,6 +43,8 @@ export class TicketController {
   @ApiQuery({ name: 'minPrice', required: false, type: Number })
   @ApiQuery({ name: 'maxPrice', required: false, type: Number })
   @ApiQuery({ name: 'location', required: false, type: String })
+  @ApiQuery({ name: 'fromDate', required: false, type: Date })
+  @ApiQuery({ name: 'toDate', required: false, type: Date })
   async getAllTickets(
     @Query('page') page: number = 1,
     @Query('size') size: number = 10,
@@ -45,6 +52,8 @@ export class TicketController {
     @Query('minPrice') minPrice: number = null,
     @Query('maxPrice') maxPrice: number = null,
     @Query('location') location: string = null,
+    @Query('fromDate') fromDate: Date = null,
+    @Query('toDate') toDate: Date = null,
   ) {
     return await this.ticketService.getAllTickets({
       page,
@@ -53,6 +62,8 @@ export class TicketController {
       minPrice,
       maxPrice,
       location,
+      fromDate,
+      toDate,
     });
   }
 
@@ -99,5 +110,35 @@ export class TicketController {
       throw new NotFoundException('User not found');
     }
     return await this.ticketService.removeTicket(id, user);
+  }
+
+  @Get('my')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @ApiOperation({ summary: 'Get my tickets' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'size', required: false, type: Number })
+  async getMyTickets(
+    @UserId() userId: string,
+    @Query('page') page: number = 1,
+    @Query('size') size: number = 10,
+  ) {
+    const user = await this.userService.getUserById(userId);
+    return await this.ticketService.getMyTickets({ user, page, size });
+  }
+
+  @Get('my/bought')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @ApiOperation({ summary: 'Get my bought tickets' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'size', required: false, type: Number })
+  async getMyBoughtTickets(
+    @UserId() userId: string,
+    @Query('page') page: number = 1,
+    @Query('size') size: number = 10,
+  ) {
+    const user = await this.userService.getUserById(userId);
+    return await this.ticketService.getMyBoughtTickets({ user, page, size });
   }
 }

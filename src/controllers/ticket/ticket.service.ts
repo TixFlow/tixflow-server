@@ -35,6 +35,8 @@ export class TicketService {
     minPrice,
     maxPrice,
     location,
+    fromDate,
+    toDate,
   }: {
     page: number;
     size: number;
@@ -42,9 +44,13 @@ export class TicketService {
     minPrice: number;
     maxPrice: number;
     location: string;
+    fromDate: Date;
+    toDate: Date;
   }): Promise<ListResponseData<Ticket>> {
     const skip = (page - 1) * size;
     const take = size;
+    const _fromDate = fromDate ? new Date(fromDate) : undefined;
+    const _toDate = toDate ? new Date(toDate) : undefined;
     const total = await this.ticketRepository.count({
       where: {
         title: search ? Like(`%${search}%`) : undefined,
@@ -57,6 +63,15 @@ export class TicketService {
             ? LessThanOrEqual(maxPrice)
             : undefined,
         location: location ? Like(`%${location}%`) : undefined,
+        expiryDate:
+          fromDate && toDate
+            ? Between(_fromDate, _toDate)
+            : fromDate
+            ? MoreThanOrEqual(_fromDate)
+            : toDate
+            ? LessThanOrEqual(_toDate)
+            : undefined,
+        status: Not(TicketStatus.Removed),
       },
     });
     const totalPage = Math.ceil(total / size);
@@ -73,8 +88,16 @@ export class TicketService {
             : maxPrice
             ? LessThanOrEqual(maxPrice)
             : undefined,
+        expiryDate:
+          fromDate && toDate
+            ? Between(_fromDate, _toDate)
+            : fromDate
+            ? MoreThanOrEqual(_fromDate)
+            : toDate
+            ? LessThanOrEqual(_toDate)
+            : undefined,
         location: location ? Like(`%${location}%`) : undefined,
-        status: Not(TicketStatus.Removed)
+        status: Not(TicketStatus.Removed),
       },
     });
     return {
@@ -154,7 +177,9 @@ export class TicketService {
     ticket.imageUrl = rest.imageUrl || ticket.imageUrl;
     ticket.price = rest.price || ticket.price;
     await this.ticketRepository.save({ ...ticket });
-    const updatedTicket = await this.ticketRepository.findOne({ where: { id } });
+    const updatedTicket = await this.ticketRepository.findOne({
+      where: { id },
+    });
     return {
       data: updatedTicket,
       message: 'Ticket updated successfully',
@@ -163,7 +188,7 @@ export class TicketService {
 
   async removeTicket(
     id: string,
-    user: User
+    user: User,
   ): Promise<ItemResponseData<Ticket>> {
     const ticket = await this.ticketRepository.findOne({ where: { id } });
     if (!ticket) {
@@ -181,10 +206,89 @@ export class TicketService {
     if (ticket.status === TicketStatus.Removed) {
       throw new BadRequestException('Ticket already deleted');
     }
-    await this.ticketRepository.save({ ...ticket, status: TicketStatus.Removed });
+    await this.ticketRepository.save({
+      ...ticket,
+      status: TicketStatus.Removed,
+    });
     return {
       data: ticket,
       message: 'Ticket deleted successfully',
+    };
+  }
+
+  async getMyTickets({
+    user,
+    page,
+    size,
+  }: {
+    user: User;
+    page: number;
+    size: number;
+  }): Promise<ListResponseData<Ticket>> {
+    const skip = (page - 1) * size;
+    const take = size;
+    const total = await this.ticketRepository.count({
+      where: { userId: user.id },
+    });
+    const totalPage = Math.ceil(total / size);
+    const data = await this.ticketRepository.find({
+      skip,
+      take,
+      where: { userId: user.id },
+    });
+    return {
+      page,
+      size,
+      total,
+      totalPage,
+      data,
+      message: 'Tickets fetched successfully',
+    };
+  }
+
+  async getMyBoughtTickets({
+    user,
+    page,
+    size,
+  }: {
+    user: User;
+    page: number;
+    size: number;
+  }): Promise<ListResponseData<Ticket>> {
+    const skip = (page - 1) * size;
+    const take = size;
+    const total = await this.ticketRepository.count({
+      where: { boughtBy: user.id },
+    });
+    const totalPage = Math.ceil(total / size);
+    const data = await this.ticketRepository.find({
+      skip,
+      take,
+      where: { boughtBy: user.id },
+    });
+    return {
+      page,
+      size,
+      total,
+      totalPage,
+      data,
+      message: 'Tickets fetched successfully',
+    };
+  }
+
+  async updateTicketStatus(
+    id: string,
+    status: TicketStatus,
+  ): Promise<ItemResponseData<Ticket>> {
+    const ticket = await this.ticketRepository.findOne({ where: { id } });
+    if (!ticket) {
+      throw new NotFoundException('Ticket not found');
+    }
+    ticket.status = status;
+    await this.ticketRepository.save(ticket);
+    return {
+      data: ticket,
+      message: 'Ticket status updated successfully',
     };
   }
 }

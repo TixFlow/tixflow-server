@@ -3,8 +3,8 @@ import { Order } from "./order.entity";
 
 export enum TransactionStatus{
     Pending = 'pending',
-    Success = 'success',
-    Failed = 'failed',
+    Paid = 'paid',
+    Procesing = 'procesing',
     Cancelled = 'cancelled'
 }
 
@@ -12,6 +12,12 @@ export enum TransactionStatus{
 export class Transaction{
     @PrimaryGeneratedColumn('uuid')
     id: string;
+
+    @Column({type: 'varchar', length: 255})
+    paymentUrl: string;
+
+    @Column({type: 'varchar', length: 255, unique: true})
+    paymentLinkId: string;
 
     @Column({
         type: 'enum',
