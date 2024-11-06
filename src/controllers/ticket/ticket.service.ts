@@ -275,4 +275,20 @@ export class TicketService {
       message: 'Tickets fetched successfully',
     };
   }
+
+  async updateTicketStatus(
+    id: string,
+    status: TicketStatus,
+  ): Promise<ItemResponseData<Ticket>> {
+    const ticket = await this.ticketRepository.findOne({ where: { id } });
+    if (!ticket) {
+      throw new NotFoundException('Ticket not found');
+    }
+    ticket.status = status;
+    await this.ticketRepository.save(ticket);
+    return {
+      data: ticket,
+      message: 'Ticket status updated successfully',
+    };
+  }
 }

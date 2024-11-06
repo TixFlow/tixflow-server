@@ -9,10 +9,11 @@ import { TicketService } from "../ticket/ticket.service";
 import { OrderService } from "./order.service";
 import { BlogService } from "../blog/blog.service";
 import { OrderController } from "./order.controller";
+import { Order } from "src/entities/order.entity";
 
 @Module({
     imports:[
-        TypeOrmModule.forFeature([User,Ticket,Blog])
+        TypeOrmModule.forFeature([User,Ticket,Blog,Order])
     ],
     controllers:[
         OrderController
