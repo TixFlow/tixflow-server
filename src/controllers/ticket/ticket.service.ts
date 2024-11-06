@@ -1,10 +1,21 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Ticket } from 'src/entities/ticket.entity';
-import { Between, LessThanOrEqual, Like, MoreThanOrEqual, Repository } from 'typeorm';
+import {
+  Between,
+  LessThanOrEqual,
+  Like,
+  MoreThanOrEqual,
+  Repository,
+} from 'typeorm';
 import { ItemResponseData, ListResponseData } from '../base.dto';
-import { CreateTicketRequestBody } from './ticket.dto';
+import { CreateTicketRequestBody, UpdateTicketRequestBody } from './ticket.dto';
 import { Blog } from 'src/entities/blog.entity';
+import { User, UserRole } from 'src/entities/user.entity';
 
 @Injectable()
 export class TicketService {
@@ -47,10 +58,13 @@ export class TicketService {
       },
     });
     const totalPage = Math.ceil(total / size);
-    const data = await this.ticketRepository.find({ skip, take, where: {
+    const data = await this.ticketRepository.find({
+      skip,
+      take,
+      where: {
         title: search ? Like(`%${search}%`) : undefined,
         price:
-            minPrice && maxPrice
+          minPrice && maxPrice
             ? Between(minPrice, maxPrice)
             : minPrice
             ? MoreThanOrEqual(minPrice)
@@ -58,7 +72,8 @@ export class TicketService {
             ? LessThanOrEqual(maxPrice)
             : undefined,
         location: location ? Like(`%${location}%`) : undefined,
-    }});
+      },
+    });
     return {
       page,
       size,
@@ -69,7 +84,7 @@ export class TicketService {
     };
   }
 
-  async getTicketById(id: string): Promise<ItemResponseData<Ticket>>{
+  async getTicketById(id: string): Promise<ItemResponseData<Ticket>> {
     const ticket = await this.ticketRepository.findOne({ where: { id } });
     if (!ticket) {
       throw new NotFoundException('Ticket not found');
@@ -80,22 +95,66 @@ export class TicketService {
     };
   }
 
-  async createTicket({userId , body}:{userId : string, body: CreateTicketRequestBody}) : Promise<ItemResponseData<Ticket>>{
-    const blog = await this.blogRepository.findOne({ where: { id: body.blogId } });
-    if(!blog){
+  async createTicket({
+    userId,
+    body,
+  }: {
+    userId: string;
+    body: CreateTicketRequestBody;
+  }): Promise<ItemResponseData<Ticket>> {
+    const blog = await this.blogRepository.findOne({
+      where: { id: body.blogId },
+    });
+    if (!blog) {
       throw new BadRequestException('Blog not found');
     }
-    const {expiryDate, ...rest} = body;
+    const { expiryDate, ...rest } = body;
     const formettedExpiryDate = new Date(expiryDate);
     const _ticket = {
       ...rest,
       expiryDate: formettedExpiryDate,
-      userId
-    }
+      userId,
+    };
     const ticket = await this.ticketRepository.save(_ticket);
     return {
       data: ticket,
       message: 'Ticket created successfully',
+    };
+  }
+
+  async updateTicket(
+    user: User,
+    id: string,
+    body: UpdateTicketRequestBody,
+  ): Promise<ItemResponseData<Ticket>> {
+    const ticket = await this.ticketRepository.findOne({ where: { id } });
+    if (!ticket) {
+      throw new NotFoundException('Ticket not found');
+    }
+    if (
+      user.role !== UserRole.Admin &&
+      user.role !== UserRole.Moderator &&
+      user.id !== ticket.userId
+    ) {
+      throw new BadRequestException(
+        'You are not allowed to update this ticket',
+      );
+    }
+    const { expiryDate, ...rest } = body;
+    const formattedExpiryDate = expiryDate ? new Date(expiryDate) : undefined;
+    ticket.expiryDate = formattedExpiryDate;
+    ticket.updatedAt = new Date();
+    ticket.title = rest.title || ticket.title;
+    ticket.description = rest.description || ticket.description;
+    ticket.location = rest.location || ticket.location;
+    ticket.code = rest.code || ticket.code;
+    ticket.imageUrl = rest.imageUrl || ticket.imageUrl;
+    ticket.price = rest.price || ticket.price;
+    await this.ticketRepository.save({ ...ticket });
+    const updatedTicket = await this.ticketRepository.findOne({ where: { id } });
+    return {
+      data: updatedTicket,
+      message: 'Ticket updated successfully',
     };
   }
 }

@@ -27,3 +27,20 @@ export class CreateTicketRequestBody{
     @IsNotEmpty()
     blogId: string;
 }
+
+export class UpdateTicketRequestBody{
+    @ApiProperty()
+    title: string;
+    @ApiProperty()
+    description: string;
+    @ApiProperty()
+    location: string;
+    @ApiProperty()
+    code: string;
+    @ApiProperty()
+    expiryDate: Date;
+    @ApiProperty()
+    imageUrl: string;
+    @ApiProperty()
+    price: number;
+}
