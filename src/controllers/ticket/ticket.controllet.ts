@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   NotFoundException,
   Param,
@@ -9,7 +10,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { TicketService } from './ticket.service';
 import { UserService } from '../user/user.service';
 import { BlogService } from '../blog/blog.service';
@@ -30,6 +31,7 @@ export class TicketController {
   ) {}
 
   @Get()
+  @ApiOperation({ summary: 'Get all tickets' })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'size', required: false, type: Number })
   @ApiQuery({ name: 'search', required: false, type: String })
@@ -55,6 +57,7 @@ export class TicketController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get ticket by id' })
   async getTicketById(@Param('id') id: string) {
     return await this.ticketService.getTicketById(id);
   }
@@ -62,6 +65,7 @@ export class TicketController {
   @Post()
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
+  @ApiOperation({ summary: 'Create ticket' })
   async craeteTicket(
     @UserId() userId: string,
     @Body() body: CreateTicketRequestBody,
@@ -72,6 +76,7 @@ export class TicketController {
   @Put(':id')
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
+  @ApiOperation({ summary: 'Update ticket' })
   async updateTicket(
     @UserId() userId: string,
     @Param('id') id: string,
@@ -82,5 +87,17 @@ export class TicketController {
       throw new NotFoundException('User not found');
     }
     return await this.ticketService.updateTicket(user, id, body);
+  }
+
+  @Delete(':id')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @ApiOperation({ summary: 'Delete ticket' })
+  async deleteTicket(@UserId() userId: string, @Param('id') id: string) {
+    const user = await this.userService.getUserById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return await this.ticketService.removeTicket(id, user);
   }
 }

@@ -1,6 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Blog, BlogStatus, Category } from 'src/entities/blog.entity';
-import { Like, Repository } from 'typeorm';
+import { Like, Not, Repository } from 'typeorm';
 import { ItemResponseData, ListResponseData } from '../base.dto';
 import {
   ForbiddenException,
@@ -55,6 +55,7 @@ export class BlogService {
       where: {
         category,
         title: search ? Like(`%${search}%`) : undefined,
+        status: Not(BlogStatus.Removed)
       },
       skip: (page - 1) * size,
       take: size,

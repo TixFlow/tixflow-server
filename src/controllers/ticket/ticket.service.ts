@@ -2,14 +2,16 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Ticket } from 'src/entities/ticket.entity';
+import { Ticket, TicketStatus } from 'src/entities/ticket.entity';
 import {
   Between,
   LessThanOrEqual,
   Like,
   MoreThanOrEqual,
+  Not,
   Repository,
 } from 'typeorm';
 import { ItemResponseData, ListResponseData } from '../base.dto';
@@ -72,6 +74,7 @@ export class TicketService {
             ? LessThanOrEqual(maxPrice)
             : undefined,
         location: location ? Like(`%${location}%`) : undefined,
+        status: Not(TicketStatus.Removed)
       },
     });
     return {
@@ -136,7 +139,7 @@ export class TicketService {
       user.role !== UserRole.Moderator &&
       user.id !== ticket.userId
     ) {
-      throw new BadRequestException(
+      throw new UnauthorizedException(
         'You are not allowed to update this ticket',
       );
     }
@@ -155,6 +158,33 @@ export class TicketService {
     return {
       data: updatedTicket,
       message: 'Ticket updated successfully',
+    };
+  }
+
+  async removeTicket(
+    id: string,
+    user: User
+  ): Promise<ItemResponseData<Ticket>> {
+    const ticket = await this.ticketRepository.findOne({ where: { id } });
+    if (!ticket) {
+      throw new NotFoundException('Ticket not found');
+    }
+    if (
+      user.role !== UserRole.Admin &&
+      user.role !== UserRole.Moderator &&
+      user.id !== ticket.userId
+    ) {
+      throw new UnauthorizedException(
+        'You are not allowed to delete this ticket',
+      );
+    }
+    if (ticket.status === TicketStatus.Removed) {
+      throw new BadRequestException('Ticket already deleted');
+    }
+    await this.ticketRepository.save({ ...ticket, status: TicketStatus.Removed });
+    return {
+      data: ticket,
+      message: 'Ticket deleted successfully',
     };
   }
 }
