@@ -1,14 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Ticket } from 'src/entities/ticket.entity';
 import { Between, LessThanOrEqual, Like, MoreThanOrEqual, Repository } from 'typeorm';
 import { ItemResponseData, ListResponseData } from '../base.dto';
+import { CreateTicketRequestBody } from './ticket.dto';
+import { Blog } from 'src/entities/blog.entity';
 
 @Injectable()
 export class TicketService {
   constructor(
     @InjectRepository(Ticket)
     private readonly ticketRepository: Repository<Ticket>,
+    @InjectRepository(Blog)
+    private readonly blogRepository: Repository<Blog>,
   ) {}
 
   async getAllTickets({
@@ -73,6 +77,18 @@ export class TicketService {
     return {
       data: ticket,
       message: 'Ticket fetched successfully',
+    };
+  }
+
+  async createTicket({userId , body}:{userId : string, body: CreateTicketRequestBody}) : Promise<ItemResponseData<Ticket>>{
+    const blog = await this.blogRepository.findOne({ where: { id: body.blogId } });
+    if(!blog){
+      throw new BadRequestException('Blog not found');
+    }
+    const ticket = await this.ticketRepository.save({ ...body, userId});
+    return {
+      data: ticket,
+      message: 'Ticket created successfully',
     };
   }
 }

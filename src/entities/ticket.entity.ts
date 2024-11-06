@@ -77,7 +77,7 @@ export class Ticket {
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column({ type: 'uuid', length: 36 })
+  @Column({ type: 'uuid', length: 36 , nullable: false})
   blogId: string;
 
   @ManyToOne(() => Blog, (blog) => blog.tickets)
