@@ -70,6 +70,9 @@ export class Ticket {
   @UpdateDateColumn()
   updatedAt: Date;
 
+  @Column({ type: 'uuid', length: 36, default: null })
+  boughtBy: string;
+
   @Column({ type: 'uuid', length: 36 })
   userId: string;
 
