@@ -50,7 +50,7 @@ export class TicketService {
     const skip = (page - 1) * size;
     const take = size;
     const _fromDate = fromDate ? new Date(fromDate) : undefined;
-    const _toDate = toDate ? new Date(toDate) : undefined
+    const _toDate = toDate ? new Date(toDate) : undefined;
     const total = await this.ticketRepository.count({
       where: {
         title: search ? Like(`%${search}%`) : undefined,
@@ -213,6 +213,66 @@ export class TicketService {
     return {
       data: ticket,
       message: 'Ticket deleted successfully',
+    };
+  }
+
+  async getMyTickets({
+    user,
+    page,
+    size,
+  }: {
+    user: User;
+    page: number;
+    size: number;
+  }): Promise<ListResponseData<Ticket>> {
+    const skip = (page - 1) * size;
+    const take = size;
+    const total = await this.ticketRepository.count({
+      where: { userId: user.id },
+    });
+    const totalPage = Math.ceil(total / size);
+    const data = await this.ticketRepository.find({
+      skip,
+      take,
+      where: { userId: user.id },
+    });
+    return {
+      page,
+      size,
+      total,
+      totalPage,
+      data,
+      message: 'Tickets fetched successfully',
+    };
+  }
+
+  async getMyBoughtTickets({
+    user,
+    page,
+    size,
+  }: {
+    user: User;
+    page: number;
+    size: number;
+  }): Promise<ListResponseData<Ticket>> {
+    const skip = (page - 1) * size;
+    const take = size;
+    const total = await this.ticketRepository.count({
+      where: { boughtBy: user.id },
+    });
+    const totalPage = Math.ceil(total / size);
+    const data = await this.ticketRepository.find({
+      skip,
+      take,
+      where: { boughtBy: user.id },
+    });
+    return {
+      page,
+      size,
+      total,
+      totalPage,
+      data,
+      message: 'Tickets fetched successfully',
     };
   }
 }
