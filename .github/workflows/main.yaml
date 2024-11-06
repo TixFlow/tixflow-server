@@ -22,6 +22,10 @@ jobs:
           echo 'DB_PASSWORD=${{ secrets.DB_PASSWORD }}' >> .env
           echo 'DB_NAME=${{ secrets.DB_NAME }}' >> .env
           echo 'JWT_SECRET=${{ secrets.JWT_SECRET }}' >> .env
+          echo 'PAYOS_CLIENTID=${{ secrets.PAYOS_CLIENTID }}' >> .env
+          echo 'PAYOS_APIKEY=${{ secrets.PAYOS_APIKEY }}' >> .env
+          echo 'PAYOS_CHECKSUMKEY=${{ secrets.PAYOS_CHECKSUMKEY }}' >> .env
+          echo 'FRONTEND_PAYMENT_URL=${{ secrets.FRONTEND_PAYMENT_URL }}' >> .env
         shell: bash
 
       - name: Compose down
