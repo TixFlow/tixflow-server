@@ -291,4 +291,21 @@ export class TicketService {
       message: 'Ticket status updated successfully',
     };
   }
+
+  async buyTicket(userId: string, ticketId: string): Promise<ItemResponseData<Ticket>> {
+    const ticket = await this.ticketRepository.findOne({ where: { id: ticketId } });
+    if (!ticket) {
+      throw new NotFoundException('Ticket not found');
+    }
+    if (ticket.status === TicketStatus.Removed) {
+      throw new BadRequestException('Ticket not available');
+    }
+    ticket.status = TicketStatus.Sold;
+    ticket.boughtBy = userId;
+    await this.ticketRepository.save(ticket);
+    return {
+      data: ticket,
+      message: 'Ticket bought successfully',
+    };
+  }
 }
