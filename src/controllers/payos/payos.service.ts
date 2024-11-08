@@ -29,7 +29,7 @@ export class PayosService {
     const payload = {
       orderCode: Number(String(Date.now()).slice(-6)),
       amount: body.amount,
-      description: `Payment for order ${body.orderId}`,
+      description: `Payment for order ${Number(String(Date.now()).slice(-6))}`,
       items: [
         {
           name: ticket.title,
