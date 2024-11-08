@@ -30,6 +30,7 @@ export class TransactionController {
       order.data.ticketId,
       TicketStatus.Sold,
     );
+    await this.ticketService.buyTicket(order.data.userId, order.data.ticketId);
     return transaction;
   }
 
