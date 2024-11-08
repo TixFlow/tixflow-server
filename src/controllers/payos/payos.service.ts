@@ -37,8 +37,8 @@ export class PayosService {
           price: ticket.price,
         },
       ],
-      returnUrl: process.env.FRONTEND_RETURN_URL,
-      cancelUrl: process.env.FRONTEND_CANCEL_URL,
+      returnUrl: 'http://localhost:3000/payment/{ticketid}',
+      cancelUrl: 'http://localhost:3000/payment/{ticketid}',
     };
     const payment = (await payos.createPaymentLink(payload));
     const transaction = (await this.transactionService.createTransaction({
