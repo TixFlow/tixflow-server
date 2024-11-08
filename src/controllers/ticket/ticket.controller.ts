@@ -112,7 +112,7 @@ export class TicketController {
     return await this.ticketService.removeTicket(id, user);
   }
 
-  @Get('my')
+  @Get('my/uploaded')
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Get my tickets' })
