@@ -6,6 +6,7 @@ import {
 } from '@nestjs/swagger';
 import { BlogService } from './blog.service';
 import {
+  BadRequestException,
   Body,
   ClassSerializerInterceptor,
   Controller,
@@ -55,7 +56,10 @@ export class BlogController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a blog by id' })
-  async getBlogById(id: string): Promise<ItemResponseData<Blog>> {
+  async getBlogById(@Param('id') id: string): Promise<ItemResponseData<Blog>> {
+    if(!id){
+      throw new BadRequestException('Id is required');
+    }
     return await this.blogService.getBlogById(id);
   }
 
