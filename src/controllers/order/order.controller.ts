@@ -8,7 +8,7 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { OrderService } from './order.service';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { CreateOrderRequestBody } from './order.dto';
@@ -20,7 +20,6 @@ import { OrderStatus } from 'src/entities/order.entity';
 
 @Controller('orders')
 @ApiTags('Order')
-@UseGuards(AuthGuard)
 export class OrderController {
   constructor(
     private readonly orderService: OrderService,
@@ -30,6 +29,8 @@ export class OrderController {
 
   @Post()
   @ApiOperation({ summary: 'Create Order' })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   async createOrder(
     @Body() body: CreateOrderRequestBody,
     @UserId() userId: string,
@@ -54,6 +55,8 @@ export class OrderController {
 
   @Put('cancel/:id')
   @ApiOperation({ summary: 'Cancel Order' })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   async cancelOrder(@UserId() userId: string, @Param('id') orderId: string) {
     const order = (await this.orderService.getOrderById(orderId)).data;
     if (order.userId !== userId) {
