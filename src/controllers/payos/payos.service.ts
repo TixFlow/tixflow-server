@@ -47,6 +47,7 @@ export class PayosService {
         amount: body.amount,
         paymentLinkId: payment.paymentLinkId,
     })).data;
+    console.log(transaction);
     return {
       data: transaction,
       message: 'Payment url created successfully',

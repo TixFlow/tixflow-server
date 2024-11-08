@@ -73,9 +73,6 @@ export class Order{
     @JoinColumn({name: 'userId'})
     user: User;
 
-    @OneToOne(() => Transaction, transaction => transaction.order)
-    transaction: Transaction;
-
     @CreateDateColumn()
     createdAt: Date;
 

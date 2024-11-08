@@ -16,6 +16,7 @@ export class PayosController {
     @Post('create-payment-url')
     async createPaymentUrl(@Body() body: CreatePayOsUrlBody) {
         const transaction = await this.payosService.createPaymentUrl(body);
+        console.log(transaction);
         const order = await this.orderService.getOrderById(body.orderId);
         await this.ticketService.updateTicketStatus(order.data.ticketId, TicketStatus.InProgress);
         return transaction;

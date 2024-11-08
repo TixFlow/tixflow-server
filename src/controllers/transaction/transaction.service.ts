@@ -19,12 +19,13 @@ export class TransactionService {
   ) {}
 
   async createTransaction(data: CreatePaymentUrlBody) {
-    await this.transactionRepository.save(data);
+    await this.transactionRepository.save({...data, totalAmount: data.amount});
     const transaction = await this.transactionRepository.find({
-      order: { createdAt: 'DESC' },
-    })[0];
+      order: { createdAt: 'ASC' },
+    });
+    console.log(transaction);
     return {
-      data: transaction,
+      data: transaction[transaction.length - 1],
       message: 'Transaction created successfully',
     };
   }

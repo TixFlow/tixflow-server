@@ -33,14 +33,10 @@ export class Transaction{
     totalAmount: number;
 
     @Column({
-        type: 'uuid',
+        type: 'varchar',
         length: 36,
     })
     orderId: string;
-
-    @OneToOne(() => Order, order => order.transaction)
-    @JoinColumn({name: 'orderId'})
-    order: Order;
 
     @CreateDateColumn()
     createdAt: Date;
